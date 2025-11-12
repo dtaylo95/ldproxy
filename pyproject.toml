@@ -38,7 +38,7 @@ test = [
 ]
 
 [project.scripts]
-ldproxy = "ldproxy.cli:main"
+ldproxy = "ldproxy.ldproxy:main"
 
 [project.urls]
 Homepage = "https://github.com/dtaylo95/ldproxy"
