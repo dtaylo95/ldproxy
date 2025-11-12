@@ -30,10 +30,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 
 # Dependencies your package requires at runtime
-dependencies = [
-    "numpy>=1.25.0",
-    "pandas>=2.1.0",
-]
+dependencies = []
 
 [project.optional-dependencies]
 test = [
