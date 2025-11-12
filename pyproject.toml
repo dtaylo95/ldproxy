@@ -1,0 +1,51 @@
+[project]
+name = "ldproxy"
+version = "0.0.1"
+authors = [
+  { name="Dylan Taylor", email="dylanjamestaylor22@gmail.com" },
+]
+description = "Generate privacy-preserving pseudo-genotypes that faithfully reproduce real-data LD structure"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.9"
+keywords = ["genomics", "linkage disequilibrium", "ld", "privacy", "pseudo-genotypes", "bioinformatics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: POSIX",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+]
+license = "MIT"
+license-files = ["LICENSE"]
+
+# Dependencies your package requires at runtime
+dependencies = [
+    "numpy>=1.25.0",
+    "pandas>=2.1.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[project.scripts]
+ldproxy = "ldproxy.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/dtaylo95/ldproxy"
+Issues = "https://github.com/dtaylo95/ldproxy/issues"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
