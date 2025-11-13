@@ -13,6 +13,7 @@ colocalization without exposing raw genotype data.
 from argparse import ArgumentParser
 from pathlib import Path
 import logging
+from geno_io import VCFReader, VCFWriter
 
 def main():
 
@@ -34,6 +35,10 @@ def main():
     mut_output_group.add_argument('--make-vcf', action='store_true', help="Output in VCF format")
     mut_output_group.add_argument('--make-bed', action='store_true', help="Output in PLINK binary format")
     mut_output_group.add_argument('--make-pgen', action='store_true', help="Output in PLINK PGEN format")
+
+    param_group = parser.add_argument_group(title="PARAMETERS")
+    param_group.add_argument('--N', type=int, default=1000, help="Number of pseudo-individuals to generate (default: 1000)")
+    param_group.add_argument('--seed', type=int, default=None, help="Random seed for reproducibility")
 
     args = parser.parse_args()
 
@@ -77,6 +82,36 @@ def main():
         else:
             logger.info(f"  --{k} {v}")
 
+
+    #======================================#
+    #             Get IO Types             #
+    #======================================#
+
+    # Input file type
+    in_type = None
+    for action in mut_input_group._group_actions:
+        if getattr(args, action.dest):
+            in_type = action.dest
+            break
+
+    # Output file type
+    out_type = None
+    for action in mut_output_group._group_actions:
+        if getattr(args, action.dest):
+            out_type = args.out_type = action.dest.replace("make_", "")
+            break
+
+
+    #======================================#
+    #        Set Up Genotype Reader        #
+    #======================================#
+
+    Reader = VCFReader
+    Writer = VCFWriter
+
+    with Reader(args.vcf) as reader, Writer(args.out.with_suffix('.vcf'), args.N) as writer:
+        for g_chunk in reader.iter_chunks(chunk_size=1000):
+            writer.write_chunk(g_chunk)
 
 if __name__ == "__main__":
     main()
