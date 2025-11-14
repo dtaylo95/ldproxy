@@ -110,7 +110,7 @@ def main():
     Writer = VCFWriter
 
     with Reader(args.vcf) as reader, Writer(args.out.with_suffix('.vcf'), args.N) as writer:
-        for g_chunk in reader.iter_chunks(chunk_size=1000):
+        for g_chunk in reader.iter_chunks(chunk_size=10000):
             writer.write_chunk(g_chunk)
 
 if __name__ == "__main__":
