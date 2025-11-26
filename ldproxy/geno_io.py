@@ -12,8 +12,47 @@ from pathlib import Path
 import pgenlib as pg
 import numpy as np
 import pandas as pd
+import sys
 
 __version__ = "0.0.1"
+
+
+
+
+#==============================================================================#
+#                                                                              #
+#                             Simple Logging Class                             #
+#                                                                              #
+#==============================================================================#
+
+class SimpleLogger:
+    
+    def __init__(self, logpath: str | Path = None, verbose: bool = True):
+        self.console = sys.stderr
+        self.verbose = verbose
+        self.logfile = open(logpath, 'w') if logpath else None
+
+    def log(self, message: str, end: str = '\n') -> None:
+        if self.verbose:
+            self.console.write(message + end)
+        if self.logfile:
+            self.logfile.write(message + end)
+            self.logfile.flush()
+
+    def close(self) -> None:
+        if self.logfile:
+            self.logfile.close()
+            self.logfile = None        
+
+    def __enter__(self) -> "SimpleLogger":
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        self.close()
+
+    def __del__(self) -> None:
+        self.close()
+
 
 
 #==============================================================================#

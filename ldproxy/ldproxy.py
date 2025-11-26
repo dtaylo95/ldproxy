@@ -13,7 +13,7 @@ colocalization without exposing raw genotype data.
 from argparse import ArgumentParser
 from pathlib import Path
 import logging
-from geno_io import PGENReader, PGENWriter
+from geno_io import SimpleLogger, PGENReader, PGENWriter
 from transform import random_orthonormal_matrix, apply_random_projection, scale_to_dosage
 import numpy as np
 import math
@@ -56,16 +56,7 @@ def main():
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Set up logger
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(message)s",
-        handlers=[
-            logging.FileHandler(log_file, mode='w'),
-            logging.StreamHandler()
-        ]
-    )
-
-    logger = logging.getLogger(__name__)
+    logger = SimpleLogger(log_file, verbose=True)
 
 
     #======================================#
@@ -76,16 +67,16 @@ def main():
     opts = vars(args)
     non_defaults = [k for k, v in opts.items() if v != parser.get_default(k)]
 
-    logger.info(f"Logging to {log_file}")
-    logger.info("Options in effect:")
+    logger.log(f"Logging to {log_file}")
+    logger.log("Options in effect:")
     for k in non_defaults:
         v = opts[k]
         # If it’s a boolean flag and True, just print the flag
         if isinstance(v, bool) and v:
-            logger.info(f"  --{k}")
+            logger.log(f"  --{k}")
         else:
-            logger.info(f"  --{k} {v}")
-    logger.info("")
+            logger.log(f"  --{k} {v}")
+    logger.log("")
 
 
     #======================================#
@@ -116,8 +107,8 @@ def main():
     N = geno_reader.n_samples
     M = geno_reader.n_variants
 
-    logger.info(f"{N} samples loaded from {args.pfile.with_suffix('.psam')}.")
-    logger.info(f"{M} variants loaded from {args.pfile.with_suffix('.pvar')}.")
+    logger.log(f"{N} samples loaded from {args.pfile.with_suffix('.psam')}.")
+    logger.log(f"{M} variants loaded from {args.pfile.with_suffix('.pvar')}.")
 
 
     #======================================#
@@ -131,8 +122,9 @@ def main():
         raise ValueError(f"The number of requested pseudo-samples ({K}) cannot exceed the number of real samples ({N}). Try again with a smaller `--K`.")
 
     # Generate the matrix
+    logger.log(f"Generating {N}x{K} projection matrix... ", end='')
     Q = random_orthonormal_matrix(N, K, args.seed)
-    logger.info(f"Generating {N}x{K} projection matrix... done.")
+    logger.log("Done.")
 
 
     #======================================#
@@ -151,6 +143,7 @@ def main():
     
     geno_reader.close()
     geno_writer.close()
+    logger.close()
 
 if __name__ == "__main__":
     main()
