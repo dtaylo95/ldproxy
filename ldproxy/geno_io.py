@@ -12,6 +12,7 @@ from pathlib import Path
 import pgenlib as pg
 import numpy as np
 import pandas as pd
+import shutil
 import sys
 
 __version__ = "0.0.1"
@@ -143,7 +144,7 @@ class PGENReader():
 #             PGEN Writer              #
 #======================================#
 
-class PGENWriter():
+class PFILEWriter():
 
     def __init__(self, path: str | Path, n_samples: int, n_variants: int):
         self.path: Path = Path(path)
@@ -154,19 +155,33 @@ class PGENWriter():
             nonref_flags = False,
             dosage_present = True
         )
+        self.n_samples = n_samples
 
     def close(self) -> None:
         if self.pgen is not None:
             self.pgen.close()
             self.pgen = None        
 
-    def __enter__(self) -> "PGENReader":
+    def __enter__(self) -> "PFILEWriter":
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
         return False
     
-    def write_chunk(self, G_chunk):
+    def write_pgen_chunk(self, G_chunk):
         for m in range(G_chunk.shape[0]):
             self.pgen.append_dosages(G_chunk[m, :])
+
+    def write_psam(self):
+        out_path = self.path.with_suffix('.psam')
+        degree = len(str(self.n_samples))
+        with open(out_path, 'w') as out_fs:
+            out_fs.write('#FID\tIID\tSEX\n')
+            for i in range(self.n_samples):
+                pseudo_sample = f'PROXY{(i+1):0{degree}d}'
+                out_fs.write(f'{pseudo_sample}\t{pseudo_sample}\tNA\n')
+
+    def copy_pvar(self, in_path):
+        out_path = self.path.with_suffix('.pvar')
+        shutil.copyfile(in_path, out_path)

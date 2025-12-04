@@ -13,7 +13,7 @@ colocalization without exposing raw genotype data.
 from argparse import ArgumentParser
 from pathlib import Path
 import logging
-from geno_io import SimpleLogger, PGENReader, PGENWriter
+from geno_io import SimpleLogger, PGENReader, PFILEWriter
 from transform import random_orthonormal_matrix, apply_random_projection, scale_to_dosage
 import numpy as np
 import math
@@ -24,7 +24,7 @@ def main():
     #           Argument Parsing           #
     #======================================#
 
-    parser = ArgumentParser(description="ldproxy: Privacy-preserving LD proxy genotype generator")
+    parser = ArgumentParser(description="ldproxy: Privacy-preserving LD proxy pseudo-genotype generator")
     
     input_group = parser.add_argument_group(title="INPUT")
     mut_input_group = input_group.add_mutually_exclusive_group(required=True)
@@ -134,12 +134,15 @@ def main():
     chunk_size = args.chunk_size
     n_chunks = math.ceil(M / chunk_size)
     
-    geno_writer = PGENWriter(args.out.with_suffix('.pgen'), N, M)
+    geno_writer = PFILEWriter(args.out, N, M)
 
     for G_chunk in geno_reader.iter_chunks(chunk_size):
         P_chunk = apply_random_projection(G_chunk, Q)
         D_chunk = scale_to_dosage(P_chunk)
-        geno_writer.write_chunk(D_chunk)
+        geno_writer.write_pgen_chunk(D_chunk)
+
+    geno_writer.write_psam()
+    geno_writer.copy_pvar(args.pfile.with_suffix('.pvar'))
     
     geno_reader.close()
     geno_writer.close()
