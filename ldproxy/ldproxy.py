@@ -17,6 +17,7 @@ from geno_io import SimpleLogger, PGENReader, PFILEWriter
 from transform import random_orthonormal_matrix, apply_random_projection, scale_to_dosage
 import numpy as np
 import math
+import time
 
 def main():
 
@@ -41,7 +42,7 @@ def main():
 
     param_group = parser.add_argument_group(title="PARAMETERS")
     param_group.add_argument('--K', type=int, default=1_000, help="Number of pseudo-individuals to generate (default: 1000)")
-    param_group.add_argument('--chunk_size', type=int, default=10_000, help="Number of variants to process at once (default: 10,000)")
+    param_group.add_argument('--chunk_size', type=int, default=1_000, help="Number of variants to process at once (default: 1000)")
     param_group.add_argument('--seed', type=int, default=None, help="Random seed for reproducibility")
 
     args = parser.parse_args()
@@ -77,6 +78,7 @@ def main():
         else:
             logger.log(f"  --{k} {v}")
     logger.log("")
+    logger.log(f"Start time: {time.strftime('%a %b %d %H:%M:%S %Y')}")
 
 
     #======================================#
@@ -140,7 +142,7 @@ def main():
         P_chunk = apply_random_projection(G_chunk, Q)
         D_chunk = scale_to_dosage(P_chunk)
         geno_writer.write_pgen_chunk(D_chunk)
-
+    
     geno_writer.write_psam()
     geno_writer.copy_pvar(args.pfile.with_suffix('.pvar'))
     
